@@ -1,0 +1,188 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"/>
+    <Import Project="secret.props" Condition="Exists('secret.props')"/>
+    <PropertyGroup>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+        <ProjectGuid>{7413BABE-8716-41F9-B22F-D30FCE498EF5}</ProjectGuid>
+        <OutputType>Library</OutputType>
+        <AppDesignerFolder>Properties</AppDesignerFolder>
+        <RootNamespace>Garage61Data</RootNamespace>
+        <AssemblyName>Garage61Data</AssemblyName>
+        <LangVersion>8.0</LangVersion>
+        <FileAlignment>512</FileAlignment>
+        <TargetFrameworkProfile/>
+        <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>full</DebugType>
+        <Optimize>false</Optimize>
+        <OutputPath>bin\Debug\</OutputPath>
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+        <DebugType>pdbonly</DebugType>
+        <Optimize>true</Optimize>
+        <OutputPath>bin\Release\</OutputPath>
+        <DefineConstants>TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+    <ItemGroup>
+        <Reference Include="AvalonDock">
+            <HintPath>$(SIMHUB_INSTALL_PATH)AvalonDock.dll</HintPath>
+        </Reference>
+        <Reference Include="AvalonDock.Themes.VS2013">
+            <HintPath>$(SIMHUB_INSTALL_PATH)AvalonDock.Themes.VS2013.dll</HintPath>
+        </Reference>
+        <Reference Include="GameReaderCommon">
+            <HintPath>$(SIMHUB_INSTALL_PATH)GameReaderCommon.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="GongSolutions.WPF.DragDrop">
+            <HintPath>$(SIMHUB_INSTALL_PATH)GongSolutions.WPF.DragDrop.dll</HintPath>
+        </Reference>
+        <Reference Include="ICarsReader">
+          <HintPath>$(SIMHUB_INSTALL_PATH)ICarsReader.dll</HintPath>
+        </Reference>
+        <Reference Include="InputManagerCS, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+            <SpecificVersion>False</SpecificVersion>
+            <HintPath>$(SIMHUB_INSTALL_PATH)InputManagerCS.dll</HintPath>
+        </Reference>
+        <Reference Include="iRacingSDK">
+            <SpecificVersion>False</SpecificVersion>
+            <HintPath>$(SIMHUB_INSTALL_PATH)iRacingSDK.dll</HintPath>
+        </Reference>
+        <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+            <SpecificVersion>False</SpecificVersion>
+            <HintPath>$(SIMHUB_INSTALL_PATH)log4net.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="MahApps.Metro, Version=1.5.0.23, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL">
+            <SpecificVersion>False</SpecificVersion>
+            <HintPath>$(SIMHUB_INSTALL_PATH)MahApps.Metro.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="MahApps.Metro.IconPacks.Core">
+            <HintPath>$(SIMHUB_INSTALL_PATH)MahApps.Metro.IconPacks.Core.dll</HintPath>
+        </Reference>
+        <Reference Include="MahApps.Metro.IconPacks.FontAwesome">
+            <HintPath>$(SIMHUB_INSTALL_PATH)MahApps.Metro.IconPacks.FontAwesome.dll</HintPath>
+        </Reference>
+        <Reference Include="MahApps.Metro.IconPacks.Material">
+            <HintPath>$(SIMHUB_INSTALL_PATH)MahApps.Metro.IconPacks.Material.dll</HintPath>
+        </Reference>
+        <Reference Include="Newtonsoft.Json">
+            <HintPath>..\..\Newtonsoft.Json.dll</HintPath>
+        </Reference>
+        <Reference Include="PresentationCore"/>
+        <Reference Include="PresentationFramework"/>
+        <Reference Include="SimHub.Logging, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+            <SpecificVersion>False</SpecificVersion>
+            <HintPath>$(SIMHUB_INSTALL_PATH)SimHub.Logging.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="SimHub.Plugins">
+            <HintPath>$(SIMHUB_INSTALL_PATH)SimHub.Plugins.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="System"/>
+        <Reference Include="System.Core"/>
+        <Reference Include="System.Drawing"/>
+        <Reference Include="System.Windows.Forms"/>
+        <Reference Include="System.Xaml"/>
+        <Reference Include="System.Xml.Linq"/>
+        <Reference Include="System.Data.DataSetExtensions"/>
+        <Reference Include="Microsoft.CSharp"/>
+        <Reference Include="System.Data"/>
+        <Reference Include="System.Net.Http"/>
+        <Reference Include="System.Xml"/>
+        <Reference Include="System.Security"/>
+        <Reference Include="WindowsBase"/>
+        <Reference Include="WoteverCommon">
+            <HintPath>$(SIMHUB_INSTALL_PATH)WoteverCommon.dll</HintPath>
+        </Reference>
+        <Reference Include="WoteverLocalization">
+            <HintPath>$(SIMHUB_INSTALL_PATH)WoteverLocalization.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="Exceptions\ApiClientException.cs"/>
+        <Compile Include="Exceptions\OAuth2Exception.cs"/>
+        <Compile Include="Garage61Plugin+DataUpdate.cs" />
+        <Compile Include="GeneratedConstants.cs"/>
+        <Compile Include="Helpers\APIClient.cs"/>
+        <Compile Include="Helpers\OAuth2RedirectListener.cs"/>
+        <Compile Include="Helpers\TokenStorage.cs"/>
+        <Compile Include="Models\ActiveRacingSession.cs"/>
+        <Compile Include="Models\FilterSettings.cs"/>
+        <Compile Include="Models\Garage61ListRequest.cs"/>
+        <Compile Include="Models\Garage61Platform.cs"/>
+        <Compile Include="Models\Garage61Lap.cs" />
+        <Compile Include="Models\PluginSettings.cs"/>
+        <Compile Include="Models\Teams.cs"/>
+        <Compile Include="Garage61Plugin.cs"/>
+        <Compile Include="Models\TokenResponse.cs"/>
+        <Compile Include="Models\UserInfo.cs"/>
+        <Compile Include="Properties\AssemblyInfo.cs"/>
+        <Compile Include="Properties\Resources.Designer.cs">
+            <AutoGen>True</AutoGen>
+            <DesignTime>True</DesignTime>
+            <DependentUpon>Resources.resx</DependentUpon>
+        </Compile>
+        <Compile Include="SettingsControl.xaml.cs">
+            <DependentUpon>SettingsControl.xaml</DependentUpon>
+        </Compile>
+        <Compile Include="UIControls\DisplayIntComboBoxItem.cs" />
+        <Compile Include="UIControls\DisplayStringComboBoxItem.cs" />
+    </ItemGroup>
+    <ItemGroup>
+        <Page Include="Properties\DesignTimeResources.xaml" Condition="'$(DesignTime)'=='true' OR ('$(SolutionPath)'!='' AND Exists('$(SolutionPath)') AND '$(BuildingInsideVisualStudio)'!='true' AND '$(BuildingInsideExpressionBlend)'!='true')">
+            <SubType>Designer</SubType>
+            <Generator>MSBuild:Compile</Generator>
+            <ContainsDesignTimeResources>true</ContainsDesignTimeResources>
+        </Page>
+        <Page Include="SettingsControl.xaml">
+            <SubType>Designer</SubType>
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include=".gitignore"/>
+        <Content Include="sdkmenuicon.png"/>
+        <Content Include="secret.props"/>
+    </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="Properties\Resources.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+    </ItemGroup>
+    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
+    <Target Name="CheckProperties" AfterTargets="InitializeBuildStatus">
+        <Message Text="Garage61ClientId: $(Garage61ClientId)" Importance="High"/>
+    </Target>
+    <Target Name="InjectConstants" BeforeTargets="BeforeBuild">
+        <WriteLinesToFile
+                File="GeneratedConstants.cs"
+                Lines="public static class BuildConstants { public const string GARAGE61_CLIENT_ID = &quot;$(Garage61ClientId)&quot; %3B  }"
+                Overwrite="true"/>
+    </Target>
+    <PropertyGroup>
+        <PostBuildEvent>
+            if not "%SIMHUB_INSTALL_PATH%"=="" XCOPY /Y /R "$(TargetDir)\$(TargetName)*" "%25SIMHUB_INSTALL_PATH%25"
+        </PostBuildEvent>
+    </PropertyGroup>
+    <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+           Other similar extension points exist, see Microsoft.Common.targets.
+      <Target Name="BeforeBuild">
+      </Target>
+      <Target Name="AfterBuild">
+      </Target>
+      -->
+</Project>

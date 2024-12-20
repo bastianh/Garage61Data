@@ -1,0 +1,102 @@
+﻿<UserControl x:Class="Garage61Data.SettingsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:styles="clr-namespace:SimHub.Plugins.Styles;assembly=SimHub.Plugins"
+             mc:Ignorable="d">
+    <ScrollViewer>
+        <StackPanel Width="800">
+            <TextBlock Text="GARAGE61 DATA" HorizontalAlignment="Center" FontSize="18" FontWeight="Bold" />
+            <styles:SHSection>
+                <StackPanel>
+                    <styles:SHButtonPrimary x:Name="LoginButton" Click="LoginButton_Click">Login (opens external browser)</styles:SHButtonPrimary>
+                    <styles:SHButtonSecondary x:Name="LogoutButton" Click="LogoutButton_Click">Logout</styles:SHButtonSecondary>
+                </StackPanel>
+            </styles:SHSection>
+
+            <styles:SHSection Title="Filter Configuration" IsEnabled="True"  Visibility="Collapsed">
+
+                <StackPanel>
+                    <styles:SHToggleCheckbox x:Name="ManualFilterSwitch" Checked="ManualFilterSwitch_OnChecked">
+                        Fetch Laps from all followers and all your team members
+                    </styles:SHToggleCheckbox>
+                
+                <Grid HorizontalAlignment="Stretch" x:Name="ManualFilterGroup">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="1" Text="Team" HorizontalAlignment="Left" FontSize="14" Margin="10,10,30,10" FontWeight="Bold" />
+                        <styles:SHListBox SelectionMode="Multiple" Grid.Row="1" Grid.Column="1" x:Name="TeamsList" HorizontalAlignment="Stretch"
+                                  DisplayMemberPath="DisplayText" SelectedValuePath="Value" SelectionChanged="TeamsFilterChanged" Margin="10"/>
+                </Grid>
+
+                    
+                </StackPanel>
+
+            </styles:SHSection>
+            <styles:SHSection Title="Manual Search">
+                <StackPanel>
+
+                    <Grid HorizontalAlignment="Stretch">
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Track" HorizontalAlignment="Left" FontSize="14"
+                                   Margin="10,10,30,10" FontWeight="Bold" />
+                        <ComboBox Grid.Row="0" Grid.Column="1" x:Name="TrackComboBox"  DisplayMemberPath="DisplayText" SelectedValuePath="Value"
+                                  SelectionChanged="TestRequestSelectionChanged"
+                                  HorizontalAlignment="Stretch" />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Car" HorizontalAlignment="Left" FontSize="14"
+                                   Margin="10" FontWeight="Bold" />
+                        <ComboBox Grid.Column="1" Grid.Row="1" x:Name="CarComboBox"  DisplayMemberPath="DisplayText" SelectedValuePath="Value"
+                                  SelectionChanged="TestRequestSelectionChanged"
+                                HorizontalAlignment="Stretch" />
+
+                        <styles:SHButtonSecondary Grid.ColumnSpan="2" Grid.Column="0" Grid.Row="2"
+                                                  Click="TestRequest_Click" HorizontalAlignment="Stretch">
+                            Send Request
+                        </styles:SHButtonSecondary>
+
+                    </Grid>
+
+                </StackPanel>
+            </styles:SHSection>
+            <styles:SHSection Title="Last Fetched Result">
+                <Grid>
+                    <DataGrid x:Name="LapsDataGrid"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              Margin="10" 
+                              >
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="FirstName" Binding="{Binding Driver.FirstName, FallbackValue='[Name Missing]'}"  />
+                            <DataGridTextColumn Header="LastName" Binding="{Binding Driver.LastName, FallbackValue='[Name Missing]'}"  />
+                            <DataGridTextColumn Header="Date" Binding="{Binding StartTime, StringFormat='yyyy-MM-dd HH:mm:ss', FallbackValue='[Missing]'}" />
+                            <DataGridTextColumn Header="Rating" Binding="{Binding DriverRating, FallbackValue='[Missing]'}" />
+                            <DataGridTextColumn Header="LapTime" Binding="{Binding LapTime, FallbackValue='[Missing]'}" />
+                        </DataGrid.Columns>
+
+                    </DataGrid>
+                </Grid>
+            </styles:SHSection>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
