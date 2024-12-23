@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using Newtonsoft.Json;
 
 namespace Garage61Data.Models
@@ -8,14 +7,16 @@ namespace Garage61Data.Models
     {
         [JsonProperty("firstName")] public string FirstName { get; set; }
         [JsonProperty("lastName")] public string LastName { get; set; }
-        [JsonIgnore] public string FullName  => $"{FirstName} {LastName}";
+        [JsonIgnore] public string FullName => $"{FirstName} {LastName}";
     }
+
     public class Garage61Lap
     {
         [JsonProperty("driver")] public Garage61LapDriver Driver { get; set; }
         [JsonProperty("driverRating")] public int DriverRating { get; set; }
-        [JsonProperty("lapTime")] public double LapTime { get; set; }
-        [JsonProperty("startTime")] public DateTime StartTime  { get; set; }
+        [JsonProperty("lapTime")] public double LapTimeRaw { get; set; }
+        [JsonProperty("startTime")] public DateTime StartTime { get; set; }
+
+        [JsonIgnore] public TimeSpan LapTime => TimeSpan.FromSeconds(LapTimeRaw);
     }
-    
 }

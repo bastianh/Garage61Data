@@ -123,15 +123,16 @@ namespace Garage61Data
             for (var i = 0; i < 16; i++)
             {
                 var index = i;
-                this.AttachDelegate($"Garage61Data.Lap.{index}.FirstName",
+                this.AttachDelegate($"Garage61Data.Lap.{index + 1}.FirstName",
                     () => ActiveSession?.Laps?[index]?.Driver.FirstName);
-                this.AttachDelegate($"Garage61Data.Lap.{index}.LastName",
+                this.AttachDelegate($"Garage61Data.Lap.{index + 1}.LastName",
                     () => ActiveSession?.Laps?[index]?.Driver.LastName);
-                this.AttachDelegate($"Garage61Data.Lap.{index}.DriverRating",
+                this.AttachDelegate($"Garage61Data.Lap.{index + 1}.DriverRating",
                     () => ActiveSession?.Laps?[index]?.DriverRating);
-                this.AttachDelegate($"Garage61Data.Lap.{index}.StartTime",
+                this.AttachDelegate($"Garage61Data.Lap.{index + 1}.StartTime",
                     () => ActiveSession?.Laps?[index]?.StartTime);
-                this.AttachDelegate($"Garage61Data.Lap.{index}.LapTime", () => ActiveSession?.Laps?[index]?.LapTime);
+                this.AttachDelegate($"Garage61Data.Lap.{index + 1}.LapTime",
+                    () => ActiveSession?.Laps?[index]?.LapTime);
             }
         }
 
