@@ -79,6 +79,11 @@ namespace Garage61Data
 
         public async Task LoginUser()
         {
+            if (ApiClient == null)
+            {
+                Logging.Current.Error("Garage61Data: ApiClient is null. Make sure InitializeDependencies() was called before LoginUser().");
+                return;
+            }
             await ApiClient.StartOAuthFlow();
             await UpdateGarage61Data();
         }
@@ -103,6 +108,7 @@ namespace Garage61Data
 
         private async Task InitializeDependencies()
         {
+            Logging.Current.Info("Garage61Data: initializing dependencies");
             // Initialize ApiClient
             ApiClient = new ApiClient(this);
 
@@ -113,7 +119,9 @@ namespace Garage61Data
             catch (Exception ex)
             {
                 Logging.Current.Error($"Garage61Data: error updating data: {ex.Message}");
-            }
+            } 
+            Logging.Current.Info("Garage61Data: initializing dependencies done");
+
         }
 
         private void AttachDelegates()

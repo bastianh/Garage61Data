@@ -78,7 +78,7 @@
             <HintPath>$(SIMHUB_INSTALL_PATH)MahApps.Metro.IconPacks.Material.dll</HintPath>
         </Reference>
         <Reference Include="Newtonsoft.Json">
-            <HintPath>..\..\Newtonsoft.Json.dll</HintPath>
+            <HintPath>$(SIMHUB_INSTALL_PATH)Newtonsoft.Json.dll</HintPath>
         </Reference>
         <Reference Include="PresentationCore"/>
         <Reference Include="PresentationFramework"/>
