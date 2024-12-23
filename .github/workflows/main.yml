@@ -2,7 +2,7 @@
 
 on:
   push:
-    branches: [ "_main" ]
+    branches: [ "main" ]
 
 jobs:
   build:
@@ -33,3 +33,9 @@ jobs:
 
       - name: Build the project
         run: msbuild Garage61Data.sln /property:Configuration=Release
+
+      - name: Store artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Garage61Data
+          path: bin/Release/Garage61Data.*
