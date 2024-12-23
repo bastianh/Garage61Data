@@ -19,7 +19,7 @@ namespace Garage61Data.Helpers
     {
         private readonly string _authEndpoint = "https://garage61.net/app/account/oauth";
 
-        private readonly string _clientId = BuildConstants.GARAGE61_CLIENT_ID;
+        private readonly string _clientId = "TEST123";
         private readonly string _garage61Api = "https://garage61.net/";
         private readonly HttpClient _httpClient;
         private readonly string _redirectUri = "http://localhost:8037/";
