@@ -89,7 +89,19 @@ namespace Garage61Data
                 }
                 else if (task.IsFaulted)
                 {
-                    Logging.Current.Error($"Garage61Data: OAuth flow error: {task.Exception?.Message}");
+                    if (task.Exception is { } aggregateException)
+                    {
+                        Logging.Current.Error("Garage61Data: OAuth flow encountered errors:");
+                        foreach (var innerException in aggregateException.InnerExceptions)
+                            Logging.Current.Error($"-- {innerException.Message}");
+                    }
+                    else
+                    {
+                        Logging.Current.Error($"Garage61Data: OAuth flow error: {task.Exception?.Message}");
+                    }
+
+                    MessageBox.Show("There was an error logging in. Please check the SimHub System Log.", "Error",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             });
         }
