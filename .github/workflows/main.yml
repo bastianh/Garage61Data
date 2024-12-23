@@ -33,10 +33,10 @@ jobs:
         uses: microsoft/setup-msbuild@v2      
 
       - name: Build the project
-        run: msbuild Garage61Data.sln /property:Configuration=Release
+        run: msbuild Garage61Data.sln /property:Configuration=Debug
 
       - name: Store artifact
         uses: actions/upload-artifact@v4
         with:
           name: Garage61DData
-          path: bin/Release/Garage61Data.*
+          path: bin/Debug/Garage61Data.*
