@@ -2,7 +2,7 @@
 
 on:
   push:
-    branches: [ "_main" ]
+    branches: [ "test_build" ]
 
 jobs:
   build:
@@ -27,9 +27,16 @@ jobs:
           echo "    <Garage61ClientId>${{ secrets.GARAGE61_CLIENT_ID }}</Garage61ClientId>" >> Garage61.props
           echo "  </PropertyGroup>" >> Garage61.props
           echo "</Project>" >> Garage61.props
+
       
       - name: Set up MSBuild
         uses: microsoft/setup-msbuild@v2      
 
       - name: Build the project
         run: msbuild Garage61Data.sln /property:Configuration=Release
+
+      - name: Store artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Garage61DData
+          path: bin/Release/Garage61Data.*
