@@ -15,7 +15,7 @@ namespace Garage61Data
     [PluginAuthor("Bastian Hoyer")]
     [PluginName("Garage61Data")]
     // ReSharper disable once ClassNeverInstantiated.Global
-    public partial class Garage61Plugin : IPlugin, IDataPlugin, IWPFSettingsV2
+    public partial class Garage61Data : IPlugin, IDataPlugin, IWPFSettingsV2
     {
         private const string GeneralSettingsName = "general";
         private const string PlatformSettingsName = "platform";
@@ -77,10 +77,10 @@ namespace Garage61Data
             return laps;
         }
 
-        public async Task<UserInfo> LoginUser()
+        public async Task LoginUser()
         {
             await ApiClient.StartOAuthFlow();
-            return await UpdateGarage61Data();
+            await UpdateGarage61Data();
         }
 
         public void LogoutUser()
@@ -108,7 +108,7 @@ namespace Garage61Data
 
             try
             {
-                UserInfo = await UpdateGarage61Data();
+                await UpdateGarage61Data();
             }
             catch (Exception ex)
             {
@@ -135,10 +135,11 @@ namespace Garage61Data
             }
         }
 
-        private async Task<UserInfo> UpdateGarage61Data()
+        private async Task UpdateGarage61Data()
         {
             await UpdateGarage61PlatformData();
-            return await ApiClient.GetMe();
+            UserInfo = await ApiClient.GetMe();
+            _settingsUi?.UpdateDialog();
         }
 
         private async Task UpdateGarage61PlatformData()

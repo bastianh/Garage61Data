@@ -11,7 +11,7 @@ namespace Garage61Data
     public partial class SettingsControl : UserControl
     {
         private readonly List<DisplayIntComboBoxItem> _cars;
-        private readonly Garage61Plugin _plugin;
+        private readonly Garage61Data _plugin;
 
         private readonly List<DisplayStringComboBoxItem> _teams;
         private readonly List<DisplayIntComboBoxItem> _tracks;
@@ -26,7 +26,7 @@ namespace Garage61Data
             _cars = new List<DisplayIntComboBoxItem>();
         }
 
-        public SettingsControl(Garage61Plugin plugin) : this()
+        public SettingsControl(Garage61Data plugin) : this()
         {
             _plugin = plugin;
             UpdateDialog();
@@ -85,8 +85,7 @@ namespace Garage61Data
             {
                 if (task.Status == TaskStatus.RanToCompletion)
                 {
-                    var userInfo = task.Result;
-                    Logging.Current.Info($"Garage61Data: user logged in: {userInfo.Slug}");
+                    Logging.Current.Info($"Garage61Data: user logged in: {UserInfo.Slug}");
                 }
                 else if (task.IsFaulted)
                 {

@@ -13,14 +13,13 @@ This plugin allows SimHub to load laps directly from **Garage61**, providing sea
 
 ### Requirements
 - **SimHub**: Download the latest version from [SimHub Official Website](https://www.simhubdash.com).
-- **Garage61 Account**: Visit [Garage61](https://garage61.com) to sign up and access your data.
+- **Garage61 Account**: Visit [Garage61](https://garage61.net) to sign up and access your data.
 
 ---
 
 ### Installation
 1. Download the plugin from the [Releases](https://github.com/bastianh/Garage61Data/releases) page.
-2. Place the plugin files in the SimHub `Plugins` folder:
-    - `Documents\SimHub\Plugins\`
+2. Place the plugin files in the SimHub folder.
 3. Start SimHub and enable the Garage61 plugin in the Plugins menu.
 
 

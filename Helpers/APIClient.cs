@@ -29,7 +29,6 @@ namespace Garage61Data.Helpers
         private string _accessToken;
         private string _refreshToken;
 
-
         public void Logout()
         {
             _accessToken = null;

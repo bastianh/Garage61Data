@@ -126,7 +126,7 @@
         <Compile Include="Models\Garage61Lap.cs" />
         <Compile Include="Models\PluginSettings.cs"/>
         <Compile Include="Models\Teams.cs"/>
-        <Compile Include="Garage61Plugin.cs"/>
+        <Compile Include="Garage61Data.cs"/>
         <Compile Include="Models\TokenResponse.cs"/>
         <Compile Include="Models\UserInfo.cs"/>
         <Compile Include="Properties\AssemblyInfo.cs"/>

@@ -10,7 +10,7 @@ using SimHub.Plugins;
 namespace Garage61Data
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public partial class Garage61Plugin
+    public partial class Garage61Data
     {
         private ActiveRacingSession _activeSession;
 
@@ -24,6 +24,41 @@ namespace Garage61Data
                 if (value != null) _ = OnNewRacingSession(value);
             }
         }
+
+        #region IDataPlugin Members
+
+        public void DataUpdate(PluginManager pluginManager, ref GameData data)
+        {
+            if (!data.GameRunning || data.NewData == null)
+            {
+                if (ActiveSession != null)
+                {
+                    ActiveSession = null;
+                    Logging.Current.Info("Garage61Data: iRacing session ended");
+                }
+
+                return;
+            }
+
+            if (ActiveSession != null) return;
+
+            if (!(data.NewData.GetRawDataObject() is DataSampleEx dataSample)) return;
+
+            ActiveSession = new ActiveRacingSession
+            {
+                CarId = dataSample.SessionData.DriverInfo.Drivers[dataSample.SessionData.DriverInfo.DriverCarIdx]
+                    .CarID,
+                CarScreenName = dataSample.SessionData.DriverInfo
+                    .Drivers[dataSample.SessionData.DriverInfo.DriverCarIdx]
+                    .CarScreenName,
+                TrackId = dataSample.SessionData.WeekendInfo.TrackID,
+                TrackName = dataSample.SessionData.WeekendInfo.TrackName
+            };
+            Logging.Current.Info(
+                $"Garage61Data: iRacing session started (Track: {ActiveSession.TrackName} / Car: {ActiveSession.CarScreenName})");
+        }
+
+        #endregion
 
         private async Task OnNewRacingSession(ActiveRacingSession value)
         {
@@ -49,38 +84,6 @@ namespace Garage61Data
             {
                 Logging.Current.Error($"Garage61Data: error fetching laps: {ex.Message}");
             }
-        }
-
-
-        public void DataUpdate(PluginManager pluginManager, ref GameData data)
-        {
-            if (!data.GameRunning || data.NewData == null)
-            {
-                if (ActiveSession != null)
-                {
-                    ActiveSession = null;
-                    Logging.Current.Info("Garage61Data: iRacing session ended");
-                }
-
-                return;
-            }
-
-            if (ActiveSession != null) return;
-            
-            if (!(data.NewData.GetRawDataObject() is DataSampleEx dataSample)) return;
-
-            ActiveSession = new ActiveRacingSession
-            {
-                CarId = dataSample.SessionData.DriverInfo.Drivers[dataSample.SessionData.DriverInfo.DriverCarIdx]
-                    .CarID,
-                CarScreenName = dataSample.SessionData.DriverInfo
-                    .Drivers[dataSample.SessionData.DriverInfo.DriverCarIdx]
-                    .CarScreenName,
-                TrackId = dataSample.SessionData.WeekendInfo.TrackID,
-                TrackName = dataSample.SessionData.WeekendInfo.TrackName
-            };
-            Logging.Current.Info(
-                $"Garage61Data: iRacing session started (Track: {ActiveSession.TrackName} / Car: {ActiveSession.CarScreenName})");
         }
     }
 }
