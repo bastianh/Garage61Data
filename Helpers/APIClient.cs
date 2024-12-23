@@ -29,7 +29,6 @@ namespace Garage61Data.Helpers
         private string _accessToken;
         private string _refreshToken;
 
-        
 
         public void Logout()
         {
@@ -266,14 +265,14 @@ namespace Garage61Data.Helpers
         public async Task<List<Garage61PlatformCar>> GetCars()
         {
             var cars = await GetAsync<Garage61ListRequest<Garage61PlatformCar>>("api/v1/cars");
-            Logging.Current.Info($"Garage61Data: fetched available cars (Count: {cars.Total}");
+            Logging.Current.Info($"Garage61Data: fetched available cars (Count: {cars.Total})");
             return cars.Items;
         }
 
         public async Task<List<Garage61PlatformTrack>> GetTracks()
         {
             var tracks = await GetAsync<Garage61ListRequest<Garage61PlatformTrack>>("api/v1/tracks");
-            Logging.Current.Info($"Garage61Data: fetched available tracks (Count: {tracks.Total}");
+            Logging.Current.Info($"Garage61Data: fetched available tracks (Count: {tracks.Total})");
             return tracks.Items;
         }
 

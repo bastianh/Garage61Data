@@ -26,7 +26,7 @@ namespace Garage61Data.Helpers
 
                 var queryParams = request.QueryString;
 
-                const string responseString = "<html><body>You can close that window now.</body></html>";
+                const string responseString = "<html><body>You can close this window now.</body></html>";
                 var buffer = Encoding.UTF8.GetBytes(responseString);
                 response.ContentLength64 = buffer.Length;
                 await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);

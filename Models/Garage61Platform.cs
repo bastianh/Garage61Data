@@ -21,9 +21,11 @@ namespace Garage61Data.Models
 
     public class Garage61Platform
     {
-        [JsonProperty("cars")] public List<Garage61PlatformCar> Cars;
-        [JsonProperty("updated")] public DateTime LastUpdated;
-        [JsonProperty("tracks")] public List<Garage61PlatformTrack> Tracks;
+        [JsonProperty("cars")] public List<Garage61PlatformCar> Cars { get; set; } = new List<Garage61PlatformCar>();
+        [JsonProperty("updated")] public DateTime LastUpdated { get; set; } = DateTime.MinValue;
+
+        [JsonProperty("tracks")]
+        public List<Garage61PlatformTrack> Tracks { get; set; } = new List<Garage61PlatformTrack>();
 
         public Garage61PlatformCar GetCarByPlatformId(string platformId)
         {

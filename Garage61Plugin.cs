@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media;
-using GameReaderCommon;
 using Garage61Data.Helpers;
 using Garage61Data.Models;
 using Garage61Data.Properties;
@@ -18,6 +17,8 @@ namespace Garage61Data
     // ReSharper disable once ClassNeverInstantiated.Global
     public partial class Garage61Plugin : IPlugin, IDataPlugin, IWPFSettingsV2
     {
+        private const string GeneralSettingsName = "general";
+        private const string PlatformSettingsName = "platform";
         private SettingsControl _settingsUi;
         private ApiClient ApiClient { get; set; }
 
@@ -32,7 +33,7 @@ namespace Garage61Data
 
         public void End(PluginManager pluginManager)
         {
-            this.SaveCommonSettings("GeneralSettings", Settings);
+            this.SaveCommonSettings(GeneralSettingsName, Settings);
         }
 
         public void Init(PluginManager pluginManager)
@@ -55,8 +56,6 @@ namespace Garage61Data
         public Control GetWPFSettingsControl(PluginManager pluginManager)
         {
             _settingsUi = new SettingsControl(this);
-            _settingsUi.FilterUpdated += UpdateFilter;
-
             return _settingsUi;
         }
 
@@ -66,7 +65,6 @@ namespace Garage61Data
 
         public async Task<List<Garage61Lap>> SendTestRequest(string trackId, string carId)
         {
-
             var parameters = new Dictionary<string, string>
             {
                 { "group", "driver-car" },
@@ -94,22 +92,13 @@ namespace Garage61Data
 
         #endregion
 
-        #region EventHandler
-
-        private void UpdateFilter()
-        {
-            this.SaveCommonSettings("GeneralSettings", Settings);
-        }
-
-
-        #endregion
 
         #region Private Methods
 
         private void InitializeSettings()
         {
-            Settings = this.ReadCommonSettings("GeneralSettings", () => new PluginSettings());
-            Garage61Platform = this.ReadCommonSettings("Garage61Platform", () => new Garage61Platform());
+            Settings = this.ReadCommonSettings(GeneralSettingsName, () => new PluginSettings());
+            Garage61Platform = this.ReadCommonSettings(PlatformSettingsName, () => new Garage61Platform());
         }
 
         private async Task InitializeDependencies()
@@ -129,15 +118,19 @@ namespace Garage61Data
 
         private void AttachDelegates()
         {
-            this.AttachDelegate($"Garage61Data.LapCount", () => ActiveSession?.Laps?.Count  ?? 0);
-            
+            this.AttachDelegate("Garage61Data.LapCount", () => ActiveSession?.Laps?.Count ?? 0);
+
             for (var i = 0; i < 16; i++)
             {
                 var index = i;
-                this.AttachDelegate($"Garage61Data.Lap.{index}.FirstName", () => ActiveSession?.Laps?[index]?.Driver.FirstName);
-                this.AttachDelegate($"Garage61Data.Lap.{index}.LastName", () => ActiveSession?.Laps?[index]?.Driver.LastName);
-                this.AttachDelegate($"Garage61Data.Lap.{index}.DriverRating", () => ActiveSession?.Laps?[index]?.DriverRating);
-                this.AttachDelegate($"Garage61Data.Lap.{index}.StartTime", () => ActiveSession?.Laps?[index]?.StartTime);
+                this.AttachDelegate($"Garage61Data.Lap.{index}.FirstName",
+                    () => ActiveSession?.Laps?[index]?.Driver.FirstName);
+                this.AttachDelegate($"Garage61Data.Lap.{index}.LastName",
+                    () => ActiveSession?.Laps?[index]?.Driver.LastName);
+                this.AttachDelegate($"Garage61Data.Lap.{index}.DriverRating",
+                    () => ActiveSession?.Laps?[index]?.DriverRating);
+                this.AttachDelegate($"Garage61Data.Lap.{index}.StartTime",
+                    () => ActiveSession?.Laps?[index]?.StartTime);
                 this.AttachDelegate($"Garage61Data.Lap.{index}.LapTime", () => ActiveSession?.Laps?[index]?.LapTime);
             }
         }
@@ -161,7 +154,7 @@ namespace Garage61Data
                     Tracks = tracks,
                     LastUpdated = DateTime.Now
                 };
-                this.SaveCommonSettings("Garage61Platform", Garage61Platform);
+                this.SaveCommonSettings(PlatformSettingsName, Garage61Platform);
                 _settingsUi?.UpdatePlatformData();
             }
         }

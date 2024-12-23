@@ -1,34 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-
 using Garage61Data.Models;
 using Garage61Data.UIControls;
-
 using SimHub;
-using SimHub.Plugins.Styles;
 
 namespace Garage61Data
 {
-
-    
     public partial class SettingsControl : UserControl
     {
+        private readonly List<DisplayIntComboBoxItem> _cars;
         private readonly Garage61Plugin _plugin;
 
         private readonly List<DisplayStringComboBoxItem> _teams;
-        private readonly List<DisplayIntComboBoxItem> _cars;
         private readonly List<DisplayIntComboBoxItem> _tracks;
         private List<Garage61Lap> _laps = new List<Garage61Lap>();
-        
-        private FilterSettings FilterSettings => _plugin.Settings.FilterSettings;
-        private UserInfo UserInfo => _plugin.UserInfo;
-        private Garage61Platform Garage61Platform => _plugin.Garage61Platform;
 
-        
+
         public SettingsControl()
         {
             InitializeComponent();
@@ -44,7 +33,9 @@ namespace Garage61Data
             UpdatePlatformData();
         }
 
-        public event Action FilterUpdated;
+        private FilterSettings FilterSettings => _plugin.Settings.FilterSettings;
+        private UserInfo UserInfo => _plugin.UserInfo;
+        private Garage61Platform Garage61Platform => _plugin.Garage61Platform;
 
         private void UpdateTeamsList()
         {
@@ -53,12 +44,14 @@ namespace Garage61Data
             {
                 if (UserInfo.Teams != null)
                 {
-                    foreach (var team in UserInfo.Teams) _teams.Add(new DisplayStringComboBoxItem(team.Name, team.Slug));
+                    foreach (var team in UserInfo.Teams)
+                        _teams.Add(new DisplayStringComboBoxItem(team.Name, team.Slug));
 
                     TeamsList.ItemsSource = null;
                     TeamsList.ItemsSource = _teams;
                 }
             }
+
             TeamsList.ItemsSource = null;
             TeamsList.ItemsSource = _teams;
         }
@@ -109,7 +102,6 @@ namespace Garage61Data
 
         private void TestRequest_Click(object sender, RoutedEventArgs e)
         {
-
             if (CarComboBox.SelectedValue == null || TrackComboBox.SelectedValue == null)
             {
                 MessageBox.Show("Please select a car and track", "Invalid Input",
@@ -117,7 +109,8 @@ namespace Garage61Data
                 return;
             }
 
-            _plugin.SendTestRequest(TrackComboBox.SelectedValue.ToString(), CarComboBox.SelectedValue.ToString()).ContinueWith(task =>
+            _plugin.SendTestRequest(TrackComboBox.SelectedValue.ToString(), CarComboBox.SelectedValue.ToString())
+                .ContinueWith(task =>
                 {
                     if (task.Status == TaskStatus.RanToCompletion)
                     {
@@ -135,7 +128,6 @@ namespace Garage61Data
                             MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
                 });
-
         }
 
         public void UpdatePlatformData()
@@ -154,11 +146,13 @@ namespace Garage61Data
                 {
                     _cars.Add(new DisplayIntComboBoxItem(car));
                 }
+
                 _tracks.Clear();
                 foreach (var track in Garage61Platform.Tracks)
                 {
                     _tracks.Add(new DisplayIntComboBoxItem(track));
                 }
+
                 CarComboBox.ItemsSource = null;
                 CarComboBox.ItemsSource = _cars;
                 CarComboBox.SelectedValue = _plugin.Settings.TestCarId;
@@ -167,14 +161,12 @@ namespace Garage61Data
                 TrackComboBox.SelectedValue = _plugin.Settings.TestTrackId;
             }
         }
-        
+
         public void UpdateFilter()
         {
-         
-            
         }
 
-        
+
         private void TeamsFilterChanged(object sender, SelectionChangedEventArgs e)
         {
             var selected = TeamsList.SelectedItems;
@@ -186,7 +178,7 @@ namespace Garage61Data
             }
             */
         }
-        
+
         private void TestRequestSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!(sender is ComboBox comboBox) || !(comboBox.SelectedItem is DisplayIntComboBoxItem item)) return;
@@ -197,7 +189,6 @@ namespace Garage61Data
 
         private void ManualFilterSwitch_OnChecked(object sender, RoutedEventArgs e)
         {
-    
         }
     }
 }
