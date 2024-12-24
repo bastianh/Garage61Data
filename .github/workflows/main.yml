@@ -22,7 +22,7 @@ jobs:
           aws configure set aws_secret_access_key ${{ secrets.R2_SECRET_ACCESS_KEY }}
           aws configure set default.region auto
           R2_ENDPOINT=${{ secrets.R2_ENDPOINT }}
-          URL=$(aws s3 presign s3://$BUCKET/$FILE --endpoint-url $R2_ENDPOINT --expires-in 3600)
+          URL=$(aws s3 presign s3://external/ExternalLibraries.7z --endpoint-url $R2_ENDPOINT --expires-in 3600)
           url -o downloaded_file.txt "$URL"
           7z x ExternalLibraries.7z -p${{ secrets.ZIP_PASSWORD }}
         shell: bash
