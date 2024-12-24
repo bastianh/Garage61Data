@@ -2,7 +2,7 @@
 
 on:
   push:
-    branches: [ "external_libs" ]
+    branches: [ "main" ]
 
 jobs:
   build:
