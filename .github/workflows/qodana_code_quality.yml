@@ -9,7 +9,7 @@ on:
 
 jobs:
   qodana:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     permissions:
       contents: write
       pull-requests: write
@@ -19,6 +19,25 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}  # to check out the actual pull request commit, not the merge commit
           fetch-depth: 0  # a full history is required for pull request analysis
+      - name: Extract External Libraries
+        run: 7z x ExternalLibraries.7z -p${{ secrets.ZIP_PASSWORD }}
+        shell: powershell
+
+      - name: Create secret props file
+        run: |
+          echo "<Project>" > Garage61.props
+          echo "  <PropertyGroup>" >> Garage61.props
+          echo "    <Garage61ClientId>${{ secrets.GARAGE61_CLIENT_ID }}</Garage61ClientId>" >> Garage61.props
+          echo "  </PropertyGroup>" >> Garage61.props
+          echo "</Project>" >> Garage61.props
+      
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v2      
+
+      - name: Build the project
+        run: msbuild Garage61Data.sln /property:Configuration=Release
+
+      
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2024.2
         with:
