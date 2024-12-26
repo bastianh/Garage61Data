@@ -35,9 +35,9 @@ jobs:
       - name: Build the project
         run: msbuild Garage61Data.sln /property:Configuration=Release
 
-#      - name: Prepare release file
-#        run: 7z a -tzip -spf- Garage61Data.zip README.md bin\Release\Garage61Data.*
-#        shell: powershell
+      - name: Prepare release file
+        run: 7z a -tzip -spf- Garage61Data.zip bin\Release\Garage61Data.* example_dashboard\*
+        shell: powershell
 
       - name: Release
         uses: softprops/action-gh-release@v2

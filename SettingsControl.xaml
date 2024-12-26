@@ -15,30 +15,33 @@
                 </StackPanel>
             </styles:SHSection>
 
-            <styles:SHSection Title="Filter Configuration" IsEnabled="True"  Visibility="Collapsed">
+            <styles:SHSection Title="Filter Configuration" IsEnabled="True" Visibility="Collapsed">
 
                 <StackPanel>
                     <styles:SHToggleCheckbox x:Name="ManualFilterSwitch" Checked="ManualFilterSwitch_OnChecked">
                         Fetch Laps from all followers and all your team members
                     </styles:SHToggleCheckbox>
-                
-                <Grid HorizontalAlignment="Stretch" x:Name="ManualFilterGroup">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="1" Text="Team" HorizontalAlignment="Left" FontSize="14" Margin="10,10,30,10" FontWeight="Bold" />
-                        <styles:SHListBox SelectionMode="Multiple" Grid.Row="1" Grid.Column="1" x:Name="TeamsList" HorizontalAlignment="Stretch"
-                                  DisplayMemberPath="DisplayText" SelectedValuePath="Value" SelectionChanged="TeamsFilterChanged" Margin="10"/>
-                </Grid>
+                    <Grid HorizontalAlignment="Stretch" x:Name="ManualFilterGroup">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
 
-                    
+                        <TextBlock Grid.Row="1" Text="Team" HorizontalAlignment="Left" FontSize="14"
+                                   Margin="10,10,30,10" FontWeight="Bold" />
+                        <styles:SHListBox SelectionMode="Multiple" Grid.Row="1" Grid.Column="1" x:Name="TeamsList"
+                                          HorizontalAlignment="Stretch"
+                                          DisplayMemberPath="DisplayText" SelectedValuePath="Value"
+                                          SelectionChanged="TeamsFilterChanged" Margin="10" />
+                    </Grid>
+
+
                 </StackPanel>
 
             </styles:SHSection>
@@ -58,15 +61,17 @@
 
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="Track" HorizontalAlignment="Left" FontSize="14"
                                    Margin="10,10,30,10" FontWeight="Bold" />
-                        <ComboBox Grid.Row="0" Grid.Column="1" x:Name="TrackComboBox"  DisplayMemberPath="DisplayText" SelectedValuePath="Value"
+                        <ComboBox Grid.Row="0" Grid.Column="1" x:Name="TrackComboBox" DisplayMemberPath="DisplayText"
+                                  SelectedValuePath="Value"
                                   SelectionChanged="TestRequestSelectionChanged"
                                   HorizontalAlignment="Stretch" />
 
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="Car" HorizontalAlignment="Left" FontSize="14"
                                    Margin="10" FontWeight="Bold" />
-                        <ComboBox Grid.Column="1" Grid.Row="1" x:Name="CarComboBox"  DisplayMemberPath="DisplayText" SelectedValuePath="Value"
+                        <ComboBox Grid.Column="1" Grid.Row="1" x:Name="CarComboBox" DisplayMemberPath="DisplayText"
+                                  SelectedValuePath="Value"
                                   SelectionChanged="TestRequestSelectionChanged"
-                                HorizontalAlignment="Stretch" />
+                                  HorizontalAlignment="Stretch" />
 
                         <styles:SHButtonSecondary Grid.ColumnSpan="2" Grid.Column="0" Grid.Row="2"
                                                   Click="TestRequest_Click" HorizontalAlignment="Stretch">
@@ -82,14 +87,17 @@
                     <DataGrid x:Name="LapsDataGrid"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
-                              Margin="10" 
-                              >
+                              Margin="10">
 
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="FirstName" Binding="{Binding Driver.FirstName, FallbackValue='[Name Missing]'}"  />
-                            <DataGridTextColumn Header="LastName" Binding="{Binding Driver.LastName, FallbackValue='[Name Missing]'}"  />
-                            <DataGridTextColumn Header="Date" Binding="{Binding StartTime, StringFormat='yyyy-MM-dd HH:mm:ss', FallbackValue='[Missing]'}" />
-                            <DataGridTextColumn Header="Rating" Binding="{Binding DriverRating, FallbackValue='[Missing]'}" />
+                            <DataGridTextColumn Header="FirstName"
+                                                Binding="{Binding Driver.FirstName, FallbackValue='[Name Missing]'}" />
+                            <DataGridTextColumn Header="LastName"
+                                                Binding="{Binding Driver.LastName, FallbackValue='[Name Missing]'}" />
+                            <DataGridTextColumn Header="Date"
+                                                Binding="{Binding StartTime, StringFormat='yyyy-MM-dd HH:mm:ss', FallbackValue='[Missing]'}" />
+                            <DataGridTextColumn Header="Rating"
+                                                Binding="{Binding DriverRating, FallbackValue='[Missing]'}" />
                             <DataGridTextColumn Header="LapTime" Binding="{Binding LapTime, FallbackValue='[Missing]'}" />
                         </DataGrid.Columns>
 

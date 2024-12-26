@@ -119,7 +119,7 @@ namespace Garage61Data
         private void AttachDelegates()
         {
             this.AttachDelegate("Garage61Data.LapCount", () => ActiveSession?.Laps?.Count ?? 0);
-
+            this.AttachDelegate("LapCount", () => ActiveSession?.Laps?.Count ?? 0);
             for (var i = 0; i < 16; i++)
             {
                 var index = i;
@@ -132,6 +132,16 @@ namespace Garage61Data
                 this.AttachDelegate($"Garage61Data.Lap.{index + 1}.StartTime",
                     () => ActiveSession?.Laps?[index]?.StartTime);
                 this.AttachDelegate($"Garage61Data.Lap.{index + 1}.LapTime",
+                    () => ActiveSession?.Laps?[index]?.LapTime);
+                this.AttachDelegate($"Lap.{index + 1}.FirstName",
+                    () => ActiveSession?.Laps?[index]?.Driver.FirstName);
+                this.AttachDelegate($"Lap.{index + 1}.LastName",
+                    () => ActiveSession?.Laps?[index]?.Driver.LastName);
+                this.AttachDelegate($"Lap.{index + 1}.DriverRating",
+                    () => ActiveSession?.Laps?[index]?.DriverRating);
+                this.AttachDelegate($"Lap.{index + 1}.StartTime",
+                    () => ActiveSession?.Laps?[index]?.StartTime);
+                this.AttachDelegate($"Lap.{index + 1}.LapTime",
                     () => ActiveSession?.Laps?[index]?.LapTime);
             }
         }
