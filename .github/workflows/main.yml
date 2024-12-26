@@ -12,13 +12,17 @@ jobs:
         uses: actions/checkout@v4
         with:
           lfs: true
-          
-      - name: Create dist folder
-        run:  mkdir dist
 
       - name: Extract External Libraries
-        run: 7z x ExternalLibraries.7z -p${{ secrets.ZIP_PASSWORD }}
-        shell: powershell
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.R2_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          aws configure set default.region auto
+          R2_ENDPOINT=${{ secrets.R2_ENDPOINT }}
+          URL=$(aws s3 presign s3://external/ExternalLibraries.7z --endpoint-url $R2_ENDPOINT --expires-in 3600)
+          curl -o ExternalLibraries.7z  "$URL"
+          7z x ExternalLibraries.7z -p${{ secrets.ZIP_PASSWORD }}
+        shell: bash
 
       - name: Create secret props file
         run: |
