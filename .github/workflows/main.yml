@@ -2,7 +2,6 @@
 
 on:
   push:
-    branches: [ "main" ]
 
 jobs:
   build:
@@ -39,7 +38,7 @@ jobs:
         run: msbuild Garage61Data.sln /property:Configuration=Release
 
       - name: Prepare release file
-        run: 7z a -tzip -spf- Garage61Data.zip bin\Release\Garage61Data.* example_dashboard\*
+        run: 7z a -tzip Garage61Data.zip bin\Release\Garage61Data.* example_dashboard\*
         shell: powershell
 
       - name: Store artifact

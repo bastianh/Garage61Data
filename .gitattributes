@@ -1,3 +1,6 @@
+# Ensure all source files use LF line endings
+* text=auto eol=lf
+
 *.zip filter=lfs diff=lfs merge=lfs -text
 *.7z filter=lfs diff=lfs merge=lfs -text
 *.png filter=lfs diff=lfs merge=lfs -text
