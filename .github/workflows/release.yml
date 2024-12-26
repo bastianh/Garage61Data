@@ -30,11 +30,11 @@ jobs:
 
       - name: Create secret props file
         run: |
-          echo "<Project>" > Garage61.props
-          echo "  <PropertyGroup>" >> Garage61.props
-          echo "    <Garage61ClientId>${{ secrets.GARAGE61_CLIENT_ID }}</Garage61ClientId>" >> Garage61.props
-          echo "  </PropertyGroup>" >> Garage61.props
-          echo "</Project>" >> Garage61.props
+          echo "<Project>" > secret.props
+          echo "  <PropertyGroup>" >> secret.props
+          echo "    <Garage61ClientId>${{ secrets.GARAGE61_CLIENT_ID }}</Garage61ClientId>" >> secret.props
+          echo "  </PropertyGroup>" >> secret.props
+          echo "</Project>" >> secret.props
       
       - name: Set up MSBuild
         uses: microsoft/setup-msbuild@v2      
