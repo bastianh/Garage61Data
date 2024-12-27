@@ -114,7 +114,7 @@
     <ItemGroup>
         <Compile Include="Exceptions\ApiClientException.cs"/>
         <Compile Include="Exceptions\OAuth2Exception.cs"/>
-        <Compile Include="Garage61Plugin+DataUpdate.cs" />
+        <Compile Include="Garage61Data+DataUpdate.cs"/>
         <Compile Include="GeneratedConstants.cs"/>
         <Compile Include="Helpers\APIClient.cs"/>
         <Compile Include="Helpers\OAuth2RedirectListener.cs"/>
