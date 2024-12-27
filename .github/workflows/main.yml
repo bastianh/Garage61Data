@@ -44,6 +44,7 @@ jobs:
       - name: Store artifact
         uses: actions/upload-artifact@v4
         with:
+          retention-days: 7
           name: Garage61Data
           path: |
             Garage61Data.zip
