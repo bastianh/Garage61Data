@@ -1,0 +1,48 @@
+name: Qodana
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: # Specify your branches here
+      - main # The 'main' branch
+      - 'releases/*' # The release branches
+
+jobs:
+  qodana:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true        
+          ref: ${{ github.event.pull_request.head.sha }}  # to check out the actual pull request commit, not the merge commit
+          fetch-depth: 0  # a full history is required for pull request analysis
+      - name: Extract External Libraries
+        run: 7z x ExternalLibraries.7z -p${{ secrets.ZIP_PASSWORD }}
+        shell: powershell
+
+      - name: Create secret props file
+        run: |
+          echo "<Project>" > Garage61.props
+          echo "  <PropertyGroup>" >> Garage61.props
+          echo "    <Garage61ClientId>${{ secrets.GARAGE61_CLIENT_ID }}</Garage61ClientId>" >> Garage61.props
+          echo "  </PropertyGroup>" >> Garage61.props
+          echo "</Project>" >> Garage61.props
+      
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v2      
+
+      - name: Build the project
+        run: msbuild Garage61Data.sln /property:Configuration=Release
+
+      
+      - name: 'Qodana Scan'
+        uses: JetBrains/qodana-action@v2024.2
+        with:
+          pr-mode: false
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_594009358 }}
+          QODANA_ENDPOINT: 'https://qodana.cloud'
