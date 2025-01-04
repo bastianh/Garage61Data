@@ -13,15 +13,16 @@ namespace Garage61Data
     public partial class Garage61Data
     {
         private ActiveRacingSession _activeSession;
+        private bool _isFetchingLaps;
 
-        private ActiveRacingSession ActiveSession
+        public ActiveRacingSession ActiveSession
         {
             get => _activeSession;
-            set
+            private set
             {
                 if (_activeSession == value) return;
                 _activeSession = value;
-                if (value != null) _ = OnNewRacingSession(value);
+                RacingSessionChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -46,22 +47,26 @@ namespace Garage61Data
 
             ActiveSession = new ActiveRacingSession
             {
-                CarId = dataSample.SessionData.DriverInfo.Drivers[dataSample.SessionData.DriverInfo.DriverCarIdx]
+                IrCarId = dataSample.SessionData.DriverInfo.Drivers[dataSample.SessionData.DriverInfo.DriverCarIdx]
                     .CarID,
-                CarScreenName = dataSample.SessionData.DriverInfo
+                IrCarScreenName = dataSample.SessionData.DriverInfo
                     .Drivers[dataSample.SessionData.DriverInfo.DriverCarIdx]
                     .CarScreenName,
-                TrackId = dataSample.SessionData.WeekendInfo.TrackID,
-                TrackName = dataSample.SessionData.WeekendInfo.TrackName
+                IrTrackId = dataSample.SessionData.WeekendInfo.TrackID,
+                IrTrackName = dataSample.SessionData.WeekendInfo.TrackName
             };
+            _ = UpdateRacingSession();
             Logging.Current.Info(
-                $"Garage61Data: iRacing session started (Track: {ActiveSession.TrackName} / Car: {ActiveSession.CarScreenName})");
+                $"Garage61Data: iRacing session started (Track: {ActiveSession.IrTrackName} / Car: {ActiveSession.IrCarScreenName})");
         }
 
         #endregion
 
-        private async Task OnNewRacingSession(ActiveRacingSession value)
+        public event EventHandler RacingSessionChanged;
+
+        private async Task UpdateRacingSession()
         {
+            if (!(_activeSession is { Laps: null }) || _isFetchingLaps) return;
             if (Garage61Platform == null)
             {
                 Logging.Current.Error("Garage61Data: Garage61Platform is null");
@@ -70,19 +75,32 @@ namespace Garage61Data
 
             try
             {
+                _isFetchingLaps = true;
+
                 var parameters = new Dictionary<string, string>
                 {
                     { "group", "driver-car" },
-                    { "tracks", Garage61Platform.GetTrackByPlatformId(value.TrackId.ToString()).Id.ToString() },
-                    { "cars", Garage61Platform.GetCarByPlatformId(value.CarId.ToString()).Id.ToString() },
+                    {
+                        "tracks",
+                        Garage61Platform.GetTrackByPlatformId(_activeSession.IrTrackId.ToString()).Id.ToString()
+                    },
+                    { "cars", Garage61Platform.GetCarByPlatformId(_activeSession.IrCarId.ToString()).Id.ToString() },
                     { "limit", "16" }
                 };
 
-                value.Laps = await ApiClient.GetLaps(parameters);
+                var filterParameters = Settings.FilterSettings.GetFilterParameters();
+                foreach (var filterParam in filterParameters) parameters[filterParam.Key] = filterParam.Value;
+
+                _activeSession.Laps = await ApiClient.GetLaps(parameters);
+                RacingSessionChanged?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {
                 Logging.Current.Error($"Garage61Data: error fetching laps: {ex.Message}");
+            }
+            finally
+            {
+                _isFetchingLaps = false;
             }
         }
     }

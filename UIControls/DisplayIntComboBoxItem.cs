@@ -21,6 +21,7 @@ namespace Garage61Data.UIControls
             DisplayText = $"{track.Name} ({track.Variant})";
             Value = track.Id;
         }
+
         public string DisplayText { get; set; }
         public int Value { get; set; }
     }
