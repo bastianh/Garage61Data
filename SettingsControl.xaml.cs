@@ -1,7 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
+using Garage61Data.Helpers;
 using Garage61Data.Models;
 using Garage61Data.UIControls;
 using SimHub;
@@ -10,11 +13,9 @@ namespace Garage61Data
 {
     public partial class SettingsControl : UserControl
     {
-        private readonly List<DisplayIntComboBoxItem> _cars;
         private readonly Garage61Data _plugin;
 
         private readonly List<DisplayStringComboBoxItem> _teams;
-        private readonly List<DisplayIntComboBoxItem> _tracks;
         private List<Garage61Lap> _laps = new List<Garage61Lap>();
 
 
@@ -22,38 +23,77 @@ namespace Garage61Data
         {
             InitializeComponent();
             _teams = new List<DisplayStringComboBoxItem>();
-            _tracks = new List<DisplayIntComboBoxItem>();
-            _cars = new List<DisplayIntComboBoxItem>();
         }
 
         public SettingsControl(Garage61Data plugin) : this()
         {
             _plugin = plugin;
+            _plugin.RacingSessionChanged += PluginOnRacingSessionChanged;
+            ManualFilterSwitch.IsChecked = FilterSettings.Enabled;
+            FilterConfiguration.Visibility = FilterSettings.Enabled ? Visibility.Visible : Visibility.Collapsed;
+            FollowerFilter.IsChecked = FilterSettings.IncludeFollower;
+            YourselfFilter.IsChecked = FilterSettings.IncludeYourself;
+
             UpdateDialog();
-            UpdatePlatformData();
         }
 
         private FilterSettings FilterSettings => _plugin.Settings.FilterSettings;
         private UserInfo UserInfo => _plugin.UserInfo;
-        private Garage61Platform Garage61Platform => _plugin.Garage61Platform;
+
+        private void UpdateActiveSession()
+        {
+            LapsDataGrid.ItemsSource = null;
+            _laps = _plugin.ActiveSession.Laps;
+            if (_laps != null) LapsDataGrid.ItemsSource = _laps;
+            CurrentSession.Visibility = Visibility.Visible;
+        }
+
+        private void HideActiveSession()
+        {
+            CurrentSession.Visibility = Visibility.Collapsed;
+            LapsDataGrid.ItemsSource = null;
+        }
+
+        private void PluginOnRacingSessionChanged(object sender, EventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (_plugin.ActiveSession != null) UpdateActiveSession();
+                else HideActiveSession();
+            });
+        }
 
         private void UpdateTeamsList()
         {
             _teams.Clear();
-            if (UserInfo != null)
-            {
-                if (UserInfo.Teams != null)
-                {
-                    foreach (var team in UserInfo.Teams)
-                        _teams.Add(new DisplayStringComboBoxItem(team.Name, team.Slug));
+            if (UserInfo?.Teams != null)
+                foreach (var team in UserInfo.Teams)
+                    _teams.Add(new DisplayStringComboBoxItem(team.Name, team.Slug));
 
-                    TeamsList.ItemsSource = null;
-                    TeamsList.ItemsSource = _teams;
+            if (FilterSettings.TeamSlugs != null)
+            {
+                foreach (var item in _teams)
+                {
+                    if (FilterSettings.TeamSlugs.Contains(item.Value)) TeamsList.SelectedItems.Add(item);
                 }
             }
 
             TeamsList.ItemsSource = null;
             TeamsList.ItemsSource = _teams;
+        }
+
+        private void UpdateIntroText()
+        {
+            var paragraph = new Paragraph();
+            paragraph.Inlines.Add(new Run("Currently logged in as: "));
+            paragraph.Inlines.Add(
+                new Run($"{UserInfo.FirstName} {UserInfo.LastName}") { FontWeight = FontWeights.Bold });
+            paragraph.Inlines.Add(new Run(" ("));
+            paragraph.Inlines.Add(new Run($"{UserInfo.NickName}") { FontStyle = FontStyles.Italic });
+            paragraph.Inlines.Add(new Run(")"));
+
+            IntroText.Document.Blocks.Clear();
+            IntroText.Document.Blocks.Add(paragraph);
         }
 
         public void UpdateDialog()
@@ -67,11 +107,14 @@ namespace Garage61Data
 
             if (UserInfo != null)
             {
+                IntroText.Visibility = Visibility.Visible;
                 LoginButton.Visibility = Visibility.Collapsed;
                 LogoutButton.Visibility = Visibility.Visible;
+                UpdateIntroText();
             }
             else
             {
+                IntroText.Visibility = Visibility.Collapsed;
                 LoginButton.Visibility = Visibility.Visible;
                 LogoutButton.Visibility = Visibility.Collapsed;
             }
@@ -79,31 +122,19 @@ namespace Garage61Data
             UpdateTeamsList();
         }
 
-        private void LoginButton_Click(object sender, RoutedEventArgs e)
+        private async void LoginButton_Click(object sender, RoutedEventArgs e)
         {
-            _plugin.LoginUser().ContinueWith(task =>
+            try
             {
-                if (task.Status == TaskStatus.RanToCompletion)
-                {
-                    Logging.Current.Info($"Garage61Data: user logged in: {UserInfo.Slug}");
-                }
-                else if (task.IsFaulted)
-                {
-                    if (task.Exception is { } aggregateException)
-                    {
-                        Logging.Current.Error("Garage61Data: OAuth flow encountered errors:");
-                        foreach (var innerException in aggregateException.InnerExceptions)
-                            Logging.Current.Error($"-- {innerException.Message}");
-                    }
-                    else
-                    {
-                        Logging.Current.Error($"Garage61Data: OAuth flow error: {task.Exception?.Message}");
-                    }
-
-                    MessageBox.Show("There was an error logging in. Please check the SimHub System Log.", "Error",
-                        MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-            });
+                await _plugin.LoginUser();
+                Logging.Current.Info($"Garage61Data: user logged in: {UserInfo.Slug}");
+            }
+            catch (Exception ex)
+            {
+                Helper.LogException(ex);
+                MessageBox.Show("There was an error logging in. Please check the SimHub System Log.", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
@@ -111,95 +142,62 @@ namespace Garage61Data
             _plugin.LogoutUser();
         }
 
-        private void TestRequest_Click(object sender, RoutedEventArgs e)
-        {
-            if (CarComboBox.SelectedValue == null || TrackComboBox.SelectedValue == null)
-            {
-                MessageBox.Show("Please select a car and track", "Invalid Input",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            _plugin.SendTestRequest(TrackComboBox.SelectedValue.ToString(), CarComboBox.SelectedValue.ToString())
-                .ContinueWith(task =>
-                {
-                    if (task.Status == TaskStatus.RanToCompletion)
-                    {
-                        var laps = task.Result;
-                        Dispatcher.Invoke(() =>
-                        {
-                            LapsDataGrid.ItemsSource = null;
-                            LapsDataGrid.ItemsSource = laps;
-                        });
-                    }
-                    else if (task.IsFaulted)
-                    {
-                        Logging.Current.Error($"Garage61Data: error sending test request: {task.Exception?.Message}");
-                        MessageBox.Show($"Something went wrong: {task.Exception?.Message}", "Error",
-                            MessageBoxButton.OK, MessageBoxImage.Warning);
-                    }
-                });
-        }
-
-        public void UpdatePlatformData()
-        {
-            if (!Dispatcher.CheckAccess())
-            {
-                // Falls nicht, den Dispatcher verwenden
-                Dispatcher.Invoke(UpdatePlatformData);
-                return;
-            }
-
-            if (Garage61Platform != null)
-            {
-                _cars.Clear();
-                foreach (var car in Garage61Platform.Cars)
-                {
-                    _cars.Add(new DisplayIntComboBoxItem(car));
-                }
-
-                _tracks.Clear();
-                foreach (var track in Garage61Platform.Tracks)
-                {
-                    _tracks.Add(new DisplayIntComboBoxItem(track));
-                }
-
-                CarComboBox.ItemsSource = null;
-                CarComboBox.ItemsSource = _cars;
-                CarComboBox.SelectedValue = _plugin.Settings.TestCarId;
-                TrackComboBox.ItemsSource = null;
-                TrackComboBox.ItemsSource = _tracks;
-                TrackComboBox.SelectedValue = _plugin.Settings.TestTrackId;
-            }
-        }
-
-        public void UpdateFilter()
-        {
-        }
-
 
         private void TeamsFilterChanged(object sender, SelectionChangedEventArgs e)
         {
-            var selected = TeamsList.SelectedItems;
-            /*
-            if (TeamsList.SelectedItem is DisplayStringComboBoxItem selectedItem && FilterSettings.TeamSlugs != selectedItem.Value)
+            var selectedValues = new List<string>();
+
+            foreach (DisplayStringComboBoxItem item in TeamsList.SelectedItems)
             {
-                FilterSettings.TeamSlugs = selectedItem.Value;
-                FilterUpdated?.Invoke();
+                selectedValues.Add(item.Value);
             }
-            */
+
+            FilterSettings.TeamSlugs = selectedValues;
         }
 
-        private void TestRequestSelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void Filter_OnUnchecked(object sender, RoutedEventArgs e)
         {
-            if (!(sender is ComboBox comboBox) || !(comboBox.SelectedItem is DisplayIntComboBoxItem item)) return;
-            if (ReferenceEquals(comboBox, CarComboBox)) _plugin.Settings.TestCarId = item.Value;
-            if (ReferenceEquals(comboBox, TrackComboBox)) _plugin.Settings.TestTrackId = item.Value;
+            if (sender is FrameworkElement element)
+                switch (element.Name)
+                {
+                    case "ManualFilterSwitch":
+                        FilterSettings.Enabled = false;
+                        FilterConfiguration.Visibility = Visibility.Collapsed;
+                        break;
+                    case "FollowerFilter":
+                        FilterSettings.IncludeFollower = false;
+                        break;
+                    case "YourselfFilter":
+                        FilterSettings.IncludeYourself = false;
+                        break;
+                }
         }
 
-
-        private void ManualFilterSwitch_OnChecked(object sender, RoutedEventArgs e)
+        private void Filter_OnChecked(object sender, RoutedEventArgs e)
         {
+            if (sender is FrameworkElement element)
+                switch (element.Name)
+                {
+                    case "ManualFilterSwitch":
+                        FilterSettings.Enabled = true;
+                        FilterConfiguration.Visibility = Visibility.Visible;
+                        break;
+                    case "FollowerFilter":
+                        FilterSettings.IncludeFollower = true;
+                        break;
+                    case "YourselfFilter":
+                        FilterSettings.IncludeYourself = true;
+                        break;
+                }
+        }
+
+        private void G61FilterDoc_OnClick(object sender, RoutedEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "https://garage61.net/docs/usage/filtering",
+                UseShellExecute = true
+            });
         }
     }
 }
