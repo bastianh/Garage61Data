@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -18,7 +19,11 @@ namespace Garage61Data
         private readonly List<DisplayStringComboBoxItem> _teams;
         private List<Garage61Lap> _laps = new List<Garage61Lap>();
 
-
+        private FilterSettings FilterSettings => _plugin.Settings.FilterSettings;
+        private UserInfo UserInfo => _plugin.UserInfo;
+        private ActiveRacingSession ActiveSession => _plugin.ActiveSession;
+        private Garage61Platform Platform => _plugin.Garage61Platform;
+        
         public SettingsControl()
         {
             InitializeComponent();
@@ -37,14 +42,13 @@ namespace Garage61Data
             UpdateDialog();
         }
 
-        private FilterSettings FilterSettings => _plugin.Settings.FilterSettings;
-        private UserInfo UserInfo => _plugin.UserInfo;
 
         private void UpdateActiveSession()
         {
             LapsDataGrid.ItemsSource = null;
             _laps = _plugin.ActiveSession.Laps;
             if (_laps != null) LapsDataGrid.ItemsSource = _laps;
+            UpdateCurrentSessionText();
             CurrentSession.Visibility = Visibility.Visible;
         }
 
@@ -96,6 +100,20 @@ namespace Garage61Data
             IntroText.Document.Blocks.Add(paragraph);
         }
 
+        private void UpdateCurrentSessionText()
+        {
+            var paragraph = new Paragraph();
+            paragraph.Inlines.Add(new Run("Current Track: "));
+            var  trackName = Platform?.GetTrackByPlatformId(ActiveSession?.IrTrackId.ToString())?.Name;
+            paragraph.Inlines.Add(
+                new Run($"{trackName ?? ""}\n") { FontWeight = FontWeights.Bold });
+            paragraph.Inlines.Add(new Run("Current Car: "));
+            paragraph.Inlines.Add(new Run($"{ActiveSession?.IrCarScreenName}") { FontWeight = FontWeights.Bold });
+
+            CurrentSessionText.Document.Blocks.Clear();
+            CurrentSessionText.Document.Blocks.Add(paragraph);
+        }
+        
         public void UpdateDialog()
         {
             if (!Dispatcher.CheckAccess())
@@ -198,6 +216,11 @@ namespace Garage61Data
                 FileName = "https://garage61.net/docs/usage/filtering",
                 UseShellExecute = true
             });
+        }
+
+        private void Refresh_OnClick(object sender, RoutedEventArgs e)
+        {
+            _ = _plugin.RefreshLaps();
         }
     }
 }

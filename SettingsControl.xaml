@@ -48,7 +48,7 @@
                                                  Checked="Filter_OnChecked" Unchecked="Filter_OnUnchecked">
                             Include drivers you are following
                         </styles:SHToggleCheckbox>
-                        <TextBlock Grid.Row="2" HorizontalAlignment="Left" FontSize="14"
+                        <TextBlock Grid.Column="0" Grid.Row="2" HorizontalAlignment="Left" FontSize="14"
                                    Margin="10,10,30,10">
                             Include Teammates from
                         </TextBlock>
@@ -63,12 +63,26 @@
             <Border Background="DarkOliveGreen" CornerRadius="10" Padding="10" Margin="25" x:Name="CurrentSession"
                     Visibility="Collapsed">
                 <StackPanel>
-                    <TextBlock Text="Active Session" FontSize="16" HorizontalAlignment="Center"
-                               Margin="0,0,0,10" />
-                    <TextBlock Text="" TextWrapping="Wrap" HorizontalAlignment="Center" x:Name="CurrentSessionText" />
-                    <!-- <Button Content="OK" Width="100" HorizontalAlignment="Center" Margin="10" />-->
+                    <TextBlock FontSize="16" HorizontalAlignment="Center"
+                               Margin="0,0,0,10">
+                        Active Session
+                    </TextBlock>
+                    <Grid Margin="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="80" />
+                        </Grid.ColumnDefinitions>
+                        <RichTextBox Grid.Column="0" x:Name="CurrentSessionText" Background="Transparent"
+                                     BorderBrush="Transparent" />
+                        <Button Grid.Column="1" Content="Refresh" Click="Refresh_OnClick" />    
+                    </Grid>
                     <Grid>
-                        <DataGrid x:Name="LapsDataGrid" AutoGenerateColumns="False" IsReadOnly="True" Margin="10">
+                        <DataGrid x:Name="LapsDataGrid" AutoGenerateColumns="False" IsReadOnly="True" Margin="10"
+                                  Background="Transparent"
+                                  BorderBrush="Transparent">
+                            <DataGrid.Resources>
+          
+                            </DataGrid.Resources>
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="FirstName"
                                                     Binding="{Binding Driver.FirstName, FallbackValue='[Name Missing]'}" />

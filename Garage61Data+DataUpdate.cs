@@ -25,26 +25,26 @@ namespace Garage61Data
                 RacingSessionChanged?.Invoke(this, EventArgs.Empty);
             }
         }
-
+        
         #region IDataPlugin Members
 
+       
         public void DataUpdate(PluginManager pluginManager, ref GameData data)
         {
-            if (!data.GameRunning || data.NewData == null)
+            if (!data.GameRunning || data.NewData == null || data.GameName != "IRacing") 
             {
-                if (ActiveSession != null)
-                {
-                    ActiveSession = null;
-                    Logging.Current.Info("Garage61Data: iRacing session ended");
-                }
-
+                if (ActiveSession == null) return;
+                ActiveSession = null;
+                Logging.Current.Info("Garage61Data: iRacing session ended");
                 return;
             }
+            
+            if (!(data.NewData.GetRawDataObject() is DataSampleEx newDataSample)) return;
+            if (ActiveSession == null) InitializeActiveSession(newDataSample);
+        }
 
-            if (ActiveSession != null) return;
-
-            if (!(data.NewData.GetRawDataObject() is DataSampleEx dataSample)) return;
-
+        private ActiveRacingSession InitializeActiveSession(DataSampleEx dataSample)
+        {
             ActiveSession = new ActiveRacingSession
             {
                 IrCarId = dataSample.SessionData.DriverInfo.Drivers[dataSample.SessionData.DriverInfo.DriverCarIdx]
@@ -58,12 +58,19 @@ namespace Garage61Data
             _ = UpdateRacingSession();
             Logging.Current.Info(
                 $"Garage61Data: iRacing session started (Track: {ActiveSession.IrTrackName} / Car: {ActiveSession.IrCarScreenName})");
+            return ActiveSession;
         }
 
         #endregion
 
         public event EventHandler RacingSessionChanged;
 
+        public async Task RefreshLaps()
+        {
+            _activeSession.Laps = null;
+            await UpdateRacingSession();
+        }
+        
         private async Task UpdateRacingSession()
         {
             if (!(_activeSession is { Laps: null }) || _isFetchingLaps) return;
