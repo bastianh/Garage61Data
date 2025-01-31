@@ -74,14 +74,14 @@
                         </Grid.ColumnDefinitions>
                         <RichTextBox Grid.Column="0" x:Name="CurrentSessionText" Background="Transparent"
                                      BorderBrush="Transparent" />
-                        <Button Grid.Column="1" Content="Refresh" Click="Refresh_OnClick" />    
+                        <Button Grid.Column="1" Content="Refresh" Click="Refresh_OnClick" />
                     </Grid>
                     <Grid>
                         <DataGrid x:Name="LapsDataGrid" AutoGenerateColumns="False" IsReadOnly="True" Margin="10"
                                   Background="Transparent"
                                   BorderBrush="Transparent">
                             <DataGrid.Resources>
-          
+
                             </DataGrid.Resources>
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="FirstName"
@@ -97,6 +97,8 @@
                             </DataGrid.Columns>
                         </DataGrid>
                     </Grid>
+                    <styles:SHButtonPrimary Click="LoadTelemetry_Click">Load Lap from Garage61</styles:SHButtonPrimary>
+                    <!-- <Button Content="Fetch Laps with Telemetry access (Garage61 pro required)" Click="ListTelemetry_OnClick" /> -->
                 </StackPanel>
             </Border>
         </StackPanel>

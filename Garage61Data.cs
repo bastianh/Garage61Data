@@ -122,12 +122,29 @@ namespace Garage61Data
             for (var i = 0; i < 16; i++)
             {
                 var index = i;
-                this.AttachDelegate($"Lap.{index + 1}.FirstName", () => ActiveSession?.Laps?[index]?.Driver.FirstName);
-                this.AttachDelegate($"Lap.{index + 1}.LastName", () => ActiveSession?.Laps?[index]?.Driver.LastName);
-                this.AttachDelegate($"Lap.{index + 1}.DriverRating", () => ActiveSession?.Laps?[index]?.DriverRating);
-                this.AttachDelegate($"Lap.{index + 1}.StartTime", () => ActiveSession?.Laps?[index]?.StartTime);
-                this.AttachDelegate($"Lap.{index + 1}.LapTime", () => ActiveSession?.Laps?[index]?.LapTime);
+                this.AttachDelegate($"Lap.{index + 1}.FirstName", () => ActiveSession?.GetLap(index)?.Driver.FirstName);
+                this.AttachDelegate($"Lap.{index + 1}.LastName", () => ActiveSession?.GetLap(index)?.Driver.LastName);
+                this.AttachDelegate($"Lap.{index + 1}.DriverRating", () => ActiveSession.GetLap(index)?.DriverRating);
+                this.AttachDelegate($"Lap.{index + 1}.StartTime", () => ActiveSession.GetLap(index)?.StartTime);
+                this.AttachDelegate($"Lap.{index + 1}.LapTime", () => ActiveSession.GetLap(index)?.LapTime);
             }
+
+            this.AttachDelegate("TelemetryLoaded", () => ActiveSession?.Telemetry != null);
+            this.AttachDelegate("TelemetryLapId", () => ActiveSession?.Telemetry?.Lap.Id);
+            this.AttachDelegate("TelemetrySteeringWheelAngle",
+                () => ActiveSession?.Telemetry?.Rows[ActiveSession.Telemetry.CurrentRow].SteeringWheelAngle);
+            this.AttachDelegate("TelemetryBrake",
+                () => ActiveSession?.Telemetry?.Rows[ActiveSession.Telemetry.CurrentRow].Brake);
+            this.AttachDelegate("TelemetryThrottle",
+                () => ActiveSession?.Telemetry?.Rows[ActiveSession.Telemetry.CurrentRow].Throttle);
+            this.AttachDelegate("TelemetryRPM",
+                () => ActiveSession?.Telemetry?.Rows[ActiveSession.Telemetry.CurrentRow].RPM);
+            this.AttachDelegate("TelemetryGear",
+                () => ActiveSession?.Telemetry?.Rows[ActiveSession.Telemetry.CurrentRow].Gear);
+            this.AttachDelegate("TelemetryClutch",
+                () => ActiveSession?.Telemetry?.Rows[ActiveSession.Telemetry.CurrentRow].Clutch);
+            this.AttachDelegate("TelemetrySpeed",
+                () => ActiveSession?.Telemetry?.Rows[ActiveSession.Telemetry.CurrentRow].Speed);
         }
 
         private async Task UpdateGarage61Data()

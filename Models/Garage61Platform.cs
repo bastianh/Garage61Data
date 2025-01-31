@@ -9,6 +9,7 @@ namespace Garage61Data.Models
         [JsonProperty("id")] public int Id;
         [JsonProperty("name")] public string Name;
         [JsonProperty("platform_id")] public string PlatformId;
+        [JsonIgnore] public int PlatformIdInt => int.Parse(PlatformId);
     }
 
     public class Garage61PlatformTrack
@@ -17,6 +18,7 @@ namespace Garage61Data.Models
         [JsonProperty("name")] public string Name;
         [JsonProperty("platform_id")] public string PlatformId;
         [JsonProperty("variant")] public string Variant;
+        [JsonIgnore] public int PlatformIdInt => int.Parse(PlatformId);
     }
 
     public class Garage61Platform
