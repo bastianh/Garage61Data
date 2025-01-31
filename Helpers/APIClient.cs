@@ -36,6 +36,38 @@ namespace Garage61Data.Helpers
             _tokenStorage.StoreTokens(null, null);
         }
 
+        public async Task<Garage61Lap> GetLap(string lapId)
+        {
+            return await GetAsync<Garage61Lap>("api/v1/laps/" + lapId);
+        }
+
+        // Speed,LapDistPct,Lat,Lon,Brake,Throttle,RPM,SteeringWheelAngle,Gear,Clutch,ABSActive,DRSActive,LatAccel,LongAccel,VertAccel,Yaw,PositionType
+        // 52.334805,0.00021398377,51.20764100644781,-1.6090673372733106,0,1,7412.37,-0.124688394,3,1,false,false,-5.3913393,2.6497703,9.028612,2.022161,3
+
+        public async Task<List<Garage61TelemetryRow>> GetLapTelemetry(string lapId)
+        {
+            return await GetAsyncCsv("api/v1/laps/" + lapId + "/csv", columns => new Garage61TelemetryRow
+            {
+                Speed = double.Parse(columns[0].Trim()),
+                LapDistPct = double.Parse(columns[1].Trim()),
+                Lat = double.Parse(columns[2].Trim()),
+                Lon = double.Parse(columns[3].Trim()),
+                Brake = double.Parse(columns[4].Trim()),
+                Throttle = double.Parse(columns[5].Trim()),
+                RPM = double.Parse(columns[6].Trim()),
+                SteeringWheelAngle = double.Parse(columns[7].Trim()),
+                Gear = int.Parse(columns[8].Trim()),
+                Clutch = double.Parse(columns[9].Trim()),
+                ABSActive = bool.Parse(columns[10].Trim()),
+                DRSActive = bool.Parse(columns[11].Trim()),
+                LatAccel = double.Parse(columns[12].Trim()),
+                LongAccel = double.Parse(columns[13].Trim()),
+                VertAccel = double.Parse(columns[14].Trim()),
+                Yaw = double.Parse(columns[15].Trim()),
+                PositionType = int.Parse(columns[16].Trim())
+            });
+        }
+
         #region ApiClient
 
         public ApiClient(IPlugin plugin)
@@ -67,6 +99,20 @@ namespace Garage61Data.Helpers
             return await SendWithRetryAsync<T>(() => CreateRequest(HttpMethod.Get, url), cancellationToken);
         }
 
+        private async Task<List<T>> GetAsyncCsv<T>(string url, Func<string[], T> mapFunction,
+            Dictionary<string, string> urlParameters = null,
+            CancellationToken cancellationToken = default)
+        {
+            if (urlParameters != null && urlParameters.Count > 0)
+            {
+                var encodedParameters = new FormUrlEncodedContent(urlParameters).ReadAsStringAsync().Result;
+                url = $"{url}?{encodedParameters}";
+            }
+
+            return await SendWithRetryAsyncCsv(() => CreateRequest(HttpMethod.Get, url), cancellationToken,
+                mapFunction);
+        }
+
         private async Task<T> PostAsync<T>(string url, object body, CancellationToken cancellationToken = default)
         {
             return await SendWithRetryAsync<T>(() => CreateRequest(HttpMethod.Post, url, body), cancellationToken);
@@ -91,6 +137,45 @@ namespace Garage61Data.Helpers
                         // Prozessiere erfolgreiche Antwort
                         var json = await response.Content.ReadAsStringAsync();
                         return JsonConvert.DeserializeObject<T>(json);
+                    }
+
+                    if (response.StatusCode == HttpStatusCode.Unauthorized && tokenRefreshed == false)
+                    {
+                        _accessToken = null;
+                        await RefreshToken();
+                        tokenRefreshed = true;
+                        continue;
+                    }
+
+                    response.EnsureSuccessStatusCode(); // Für andere Fehler
+                }
+                catch (Exception ex)
+                {
+                    Logging.Current.Error($"Garage61Data: error sending request: {ex.Message}");
+                    throw new ApiClientException($"Request failed {ex.Message}");
+                }
+            } while (tokenRefreshed);
+
+            throw new ApiClientException("Request failed");
+        }
+
+        private async Task<List<T>> SendWithRetryAsyncCsv<T>(Func<Task<HttpRequestMessage>> requestBuilder,
+            CancellationToken cancellationToken, Func<string[], T> mapFunction)
+        {
+            if (string.IsNullOrEmpty(_refreshToken)) throw new ApiClientException("Refresh token is missing or null.");
+
+            var tokenRefreshed = false;
+            do
+            {
+                try
+                {
+                    var request = await requestBuilder();
+                    var response = await _httpClient.SendAsync(request, cancellationToken);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        // Prozessiere erfolgreiche Antwort
+                        var json = await response.Content.ReadAsStringAsync();
+                        return CsvParser.ParseCsvFromString(json, mapFunction);
                     }
 
                     if (response.StatusCode == HttpStatusCode.Unauthorized && tokenRefreshed == false)

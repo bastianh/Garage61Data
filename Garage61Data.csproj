@@ -113,10 +113,13 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="Exceptions\ApiClientException.cs"/>
+        <Compile Include="Exceptions\CarMismatchException.cs"/>
         <Compile Include="Exceptions\OAuth2Exception.cs"/>
+        <Compile Include="Exceptions\TrackMismatchException.cs"/>
         <Compile Include="Garage61Data+DataUpdate.cs"/>
         <Compile Include="GeneratedConstants.cs"/>
         <Compile Include="Helpers\APIClient.cs"/>
+        <Compile Include="Helpers\CSVParser.cs"/>
         <Compile Include="Helpers\Helpers.cs"/>
         <Compile Include="Helpers\OAuth2RedirectListener.cs"/>
         <Compile Include="Helpers\TokenStorage.cs"/>
@@ -125,6 +128,8 @@
         <Compile Include="Models\Garage61ListRequest.cs"/>
         <Compile Include="Models\Garage61Platform.cs"/>
         <Compile Include="Models\Garage61Lap.cs"/>
+        <Compile Include="Models\Garage61Telemetry.cs"/>
+        <Compile Include="Models\Garage61TelemetryRow.cs"/>
         <Compile Include="Models\PluginSettings.cs"/>
         <Compile Include="Models\Teams.cs"/>
         <Compile Include="Garage61Data.cs"/>
@@ -141,6 +146,7 @@
         </Compile>
         <Compile Include="UIControls\DisplayIntComboBoxItem.cs"/>
         <Compile Include="UIControls\DisplayStringComboBoxItem.cs"/>
+        <Compile Include="UIControls\LoadTelemetryDialogWindow.xaml.cs"/>
     </ItemGroup>
     <ItemGroup>
         <Page Include="Properties\DesignTimeResources.xaml" Condition="'$(DesignTime)'=='true' OR ('$(SolutionPath)'!='' AND Exists('$(SolutionPath)') AND '$(BuildingInsideVisualStudio)'!='true' AND '$(BuildingInsideExpressionBlend)'!='true')">
@@ -152,6 +158,7 @@
             <SubType>Designer</SubType>
             <Generator>MSBuild:Compile</Generator>
         </Page>
+        <Page Include="UIControls\LoadTelemetryDialogWindow.xaml"/>
     </ItemGroup>
     <ItemGroup>
         <Content Include=".gitignore"/>

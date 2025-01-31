@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Forms;
+using Garage61Data.Exceptions;
 using Garage61Data.Helpers;
 using Garage61Data.Models;
 using Garage61Data.UIControls;
 using SimHub;
+using SimHub.Plugins.Styles;
+using MessageBox = System.Windows.MessageBox;
+using UserControl = System.Windows.Controls.UserControl;
 
 namespace Garage61Data
 {
@@ -19,11 +23,6 @@ namespace Garage61Data
         private readonly List<DisplayStringComboBoxItem> _teams;
         private List<Garage61Lap> _laps = new List<Garage61Lap>();
 
-        private FilterSettings FilterSettings => _plugin.Settings.FilterSettings;
-        private UserInfo UserInfo => _plugin.UserInfo;
-        private ActiveRacingSession ActiveSession => _plugin.ActiveSession;
-        private Garage61Platform Platform => _plugin.Garage61Platform;
-        
         public SettingsControl()
         {
             InitializeComponent();
@@ -41,6 +40,11 @@ namespace Garage61Data
 
             UpdateDialog();
         }
+
+        private FilterSettings FilterSettings => _plugin.Settings.FilterSettings;
+        private UserInfo UserInfo => _plugin.UserInfo;
+        private ActiveRacingSession ActiveSession => _plugin.ActiveSession;
+        private Garage61Platform Platform => _plugin.Garage61Platform;
 
 
         private void UpdateActiveSession()
@@ -75,12 +79,9 @@ namespace Garage61Data
                     _teams.Add(new DisplayStringComboBoxItem(team.Name, team.Slug));
 
             if (FilterSettings.TeamSlugs != null)
-            {
                 foreach (var item in _teams)
-                {
-                    if (FilterSettings.TeamSlugs.Contains(item.Value)) TeamsList.SelectedItems.Add(item);
-                }
-            }
+                    if (FilterSettings.TeamSlugs.Contains(item.Value))
+                        TeamsList.SelectedItems.Add(item);
 
             TeamsList.ItemsSource = null;
             TeamsList.ItemsSource = _teams;
@@ -104,16 +105,22 @@ namespace Garage61Data
         {
             var paragraph = new Paragraph();
             paragraph.Inlines.Add(new Run("Current Track: "));
-            var  trackName = Platform?.GetTrackByPlatformId(ActiveSession?.IrTrackId.ToString())?.Name;
+            var trackName = Platform?.GetTrackByPlatformId(ActiveSession?.IrTrackId.ToString())?.Name;
             paragraph.Inlines.Add(
                 new Run($"{trackName ?? ""}\n") { FontWeight = FontWeights.Bold });
             paragraph.Inlines.Add(new Run("Current Car: "));
             paragraph.Inlines.Add(new Run($"{ActiveSession?.IrCarScreenName}") { FontWeight = FontWeights.Bold });
 
+            if (ActiveSession?.Telemetry != null)
+            {
+                paragraph.Inlines.Add(new Run("\nTelemetry loaded for lap: "));
+                paragraph.Inlines.Add(new Run($"{ActiveSession.Telemetry.Lap.Id}") { FontWeight = FontWeights.Bold });
+            }
+
             CurrentSessionText.Document.Blocks.Clear();
             CurrentSessionText.Document.Blocks.Add(paragraph);
         }
-        
+
         public void UpdateDialog()
         {
             if (!Dispatcher.CheckAccess())
@@ -165,10 +172,7 @@ namespace Garage61Data
         {
             var selectedValues = new List<string>();
 
-            foreach (DisplayStringComboBoxItem item in TeamsList.SelectedItems)
-            {
-                selectedValues.Add(item.Value);
-            }
+            foreach (DisplayStringComboBoxItem item in TeamsList.SelectedItems) selectedValues.Add(item.Value);
 
             FilterSettings.TeamSlugs = selectedValues;
         }
@@ -221,6 +225,41 @@ namespace Garage61Data
         private void Refresh_OnClick(object sender, RoutedEventArgs e)
         {
             _ = _plugin.RefreshLaps();
+        }
+
+        private void ListTelemetry_OnClick(object sender, RoutedEventArgs e)
+        {
+            _ = _plugin.ListTelemetryLaps();
+        }
+
+        private async void LoadTelemetry_Click(object sender, RoutedEventArgs e)
+        {
+            var dialogWindow = new LoadTelemetryDialogWindow();
+
+            var res = await dialogWindow.ShowDialogWindowAsync(this);
+
+            if (res == DialogResult.OK)
+            {
+                var lapId = dialogWindow.LapId;
+                Logging.Current.Info($"Garage61Data: Loading telemetry for lap {lapId}");
+                try
+                {
+                    await _plugin.LoadTelemetry(lapId);
+                }
+                catch (TrackMismatchException)
+                {
+                    await SHMessageBox.Show("The track of the selected lap does not match the current track.");
+                }
+                catch (CarMismatchException)
+                {
+                    await SHMessageBox.Show("The car of the selected lap does not match the current car.");
+                }
+                catch (ApiClientException)
+                {
+                    await SHMessageBox.Show("The Lap could not be loaded. Please check the SimHub System Log.");
+                    throw;
+                }
+            }
         }
     }
 }
