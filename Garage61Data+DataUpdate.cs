@@ -84,14 +84,27 @@ namespace Garage61Data
             {
                 _isFetchingLaps = true;
 
+                var track = Garage61Platform.GetTrackByPlatformId(_activeSession.IrTrackId.ToString());
+                if (track == null)
+                {
+                    Logging.Current.Warn($"Garage61Data: Could not find Garage61 track ID for iRacing track ID: {_activeSession.IrTrackId}. Skipping lap update.");
+                    _isFetchingLaps = false; // Reset flag before returning
+                    return;
+                }
+
+                var car = Garage61Platform.GetCarByPlatformId(_activeSession.IrCarId.ToString());
+                if (car == null)
+                {
+                    Logging.Current.Warn($"Garage61Data: Could not find Garage61 car ID for iRacing car ID: {_activeSession.IrCarId}. Skipping lap update.");
+                    _isFetchingLaps = false; // Reset flag before returning
+                    return;
+                }
+
                 var parameters = new Dictionary<string, string>
                 {
                     { "group", "driver-car" },
-                    {
-                        "tracks",
-                        Garage61Platform.GetTrackByPlatformId(_activeSession.IrTrackId.ToString()).Id.ToString()
-                    },
-                    { "cars", Garage61Platform.GetCarByPlatformId(_activeSession.IrCarId.ToString()).Id.ToString() },
+                    { "tracks", track.Id.ToString() },
+                    { "cars", car.Id.ToString() },
                     { "limit", "16" }
                 };
 

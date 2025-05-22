@@ -118,7 +118,7 @@ namespace Garage61Data
         {
             if (!Dispatcher.CheckAccess())
             {
-                // Falls nicht, den Dispatcher verwenden
+                // If not, use the Dispatcher
                 Dispatcher.Invoke(UpdateDialog);
                 return;
             }

@@ -60,19 +60,19 @@ namespace Garage61Data.Helpers
         {
             if (urlParameters != null && urlParameters.Count > 0)
             {
-                var encodedParameters = new FormUrlEncodedContent(urlParameters).ReadAsStringAsync().Result;
+                var encodedParameters = await new FormUrlEncodedContent(urlParameters).ReadAsStringAsync().ConfigureAwait(false);
                 url = $"{url}?{encodedParameters}";
             }
 
-            return await SendWithRetryAsync<T>(() => CreateRequest(HttpMethod.Get, url), cancellationToken);
+            return await SendWithRetryAsync<T>(ct => CreateRequest(HttpMethod.Get, url, null, ct), cancellationToken).ConfigureAwait(false);
         }
 
         private async Task<T> PostAsync<T>(string url, object body, CancellationToken cancellationToken = default)
         {
-            return await SendWithRetryAsync<T>(() => CreateRequest(HttpMethod.Post, url, body), cancellationToken);
+            return await SendWithRetryAsync<T>(ct => CreateRequest(HttpMethod.Post, url, body, ct), cancellationToken).ConfigureAwait(false);
         }
 
-        private async Task<T> SendWithRetryAsync<T>(Func<Task<HttpRequestMessage>> requestBuilder,
+        private async Task<T> SendWithRetryAsync<T>(Func<CancellationToken, Task<HttpRequestMessage>> requestBuilder,
             CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(_refreshToken)) throw new ApiClientException("Refresh token is missing or null.");
@@ -82,26 +82,26 @@ namespace Garage61Data.Helpers
             {
                 try
                 {
-                    var request = await requestBuilder();
+                    var request = await requestBuilder(cancellationToken).ConfigureAwait(false);
 
-                    var response = await _httpClient.SendAsync(request, cancellationToken);
+                    var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
                     if (response.IsSuccessStatusCode)
                     {
-                        // Prozessiere erfolgreiche Antwort
-                        var json = await response.Content.ReadAsStringAsync();
+                        // Process successful response
+                        var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                         return JsonConvert.DeserializeObject<T>(json);
                     }
 
                     if (response.StatusCode == HttpStatusCode.Unauthorized && tokenRefreshed == false)
                     {
                         _accessToken = null;
-                        await RefreshToken();
+                        await RefreshToken(cancellationToken).ConfigureAwait(false);
                         tokenRefreshed = true;
                         continue;
                     }
 
-                    response.EnsureSuccessStatusCode(); // Für andere Fehler
+                    response.EnsureSuccessStatusCode(); // For other errors
                 }
                 catch (Exception ex)
                 {
@@ -113,9 +113,9 @@ namespace Garage61Data.Helpers
             throw new ApiClientException("Request failed");
         }
 
-        private async Task<HttpRequestMessage> CreateRequest(HttpMethod method, string url, object body = null)
+        private async Task<HttpRequestMessage> CreateRequest(HttpMethod method, string url, object body = null, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrEmpty(_accessToken)) await RefreshToken();
+            if (string.IsNullOrEmpty(_accessToken)) await RefreshToken(cancellationToken).ConfigureAwait(false);
 
             var request = new HttpRequestMessage(method, url)
             {
@@ -133,7 +133,7 @@ namespace Garage61Data.Helpers
 
         #region OAuth
 
-        public async Task StartOAuthFlow()
+        public async Task StartOAuthFlow(CancellationToken cancellationToken = default)
         {
             var redirectListener = new OAuth2RedirectListener(_redirectUri);
 
@@ -154,11 +154,11 @@ namespace Garage61Data.Helpers
 
             if (result.State != state) throw new OAuth2Exception("Invalid State");
 
-            await GetTokenAsync(result.Code);
+            await GetTokenAsync(result.Code, cancellationToken).ConfigureAwait(false);
         }
 
 
-        private async Task GetTokenAsync(string authCode)
+        private async Task GetTokenAsync(string authCode, CancellationToken cancellationToken = default)
         {
             using var httpClient = new HttpClient();
 
@@ -174,17 +174,17 @@ namespace Garage61Data.Helpers
 
             try
             {
-                var response = await httpClient.PostAsync(_tokenEndpoint, content);
+                var response = await httpClient.PostAsync(_tokenEndpoint, content, cancellationToken).ConfigureAwait(false);
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    // Fehlerbehandlung
-                    var errorDetails = await response.Content.ReadAsStringAsync();
+                    // Error handling
+                    var errorDetails = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     throw new OAuth2Exception(
-                        $"Tokenanfrage fehlgeschlagen: {response.StatusCode}, {errorDetails}");
+                        $"Token request failed: {response.StatusCode}, {errorDetails}");
                 }
 
-                var responseString = await response.Content.ReadAsStringAsync();
+                var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var tokenResponse = JsonConvert.DeserializeObject<TokenResponse>(responseString);
 
                 _accessToken = tokenResponse.AccessToken;
@@ -194,12 +194,12 @@ namespace Garage61Data.Helpers
             }
             catch (Exception ex)
             {
-                throw new OAuth2Exception($"Fehler bei der Tokenabholung: {ex.Message}");
+                throw new OAuth2Exception($"Error during token retrieval: {ex.Message}");
             }
         }
 
 
-        private async Task RefreshToken()
+        private async Task RefreshToken(CancellationToken cancellationToken = default)
         {
             using var httpClient = new HttpClient();
 
@@ -217,15 +217,15 @@ namespace Garage61Data.Helpers
 
             try
             {
-                var response = await httpClient.PostAsync(_tokenEndpoint, content);
+                var response = await httpClient.PostAsync(_tokenEndpoint, content, cancellationToken).ConfigureAwait(false);
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorDetails = await response.Content.ReadAsStringAsync();
+                    var errorDetails = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     throw new OAuth2Exception($"Failed to refresh token: {response.StatusCode}, {errorDetails}");
                 }
 
-                var responseString = await response.Content.ReadAsStringAsync();
+                var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var tokenResponse = JsonConvert.DeserializeObject<TokenResponse>(responseString);
 
                 _accessToken = tokenResponse.AccessToken;
@@ -243,34 +243,34 @@ namespace Garage61Data.Helpers
 
         #region Api Methods
 
-        public async Task<UserInfo> GetMe()
+        public async Task<UserInfo> GetMe(CancellationToken cancellationToken = default)
         {
-            var userInfo = await GetAsync<UserInfo>("api/v1/me");
+            var userInfo = await GetAsync<UserInfo>("api/v1/me", null, cancellationToken).ConfigureAwait(false);
 
             Logging.Current.Info($"Garage61Data: updated userdata from garage61 {userInfo.Slug}");
 
             return userInfo;
         }
 
-        public async Task<List<Garage61Lap>> GetLaps(Dictionary<string, string> parameters)
+        public async Task<List<Garage61Lap>> GetLaps(Dictionary<string, string> parameters, CancellationToken cancellationToken = default)
         {
-            var laps = await GetAsync<Garage61ListRequest<Garage61Lap>>("api/v1/laps", parameters);
+            var laps = await GetAsync<Garage61ListRequest<Garage61Lap>>("api/v1/laps", parameters, cancellationToken).ConfigureAwait(false);
 
             Logging.Current.Info($"Garage61Data: fetched laps data (Count: {laps.Total})");
 
             return laps.Items;
         }
 
-        public async Task<List<Garage61PlatformCar>> GetCars()
+        public async Task<List<Garage61PlatformCar>> GetCars(CancellationToken cancellationToken = default)
         {
-            var cars = await GetAsync<Garage61ListRequest<Garage61PlatformCar>>("api/v1/cars");
+            var cars = await GetAsync<Garage61ListRequest<Garage61PlatformCar>>("api/v1/cars", null, cancellationToken).ConfigureAwait(false);
             Logging.Current.Info($"Garage61Data: fetched available cars (Count: {cars.Total})");
             return cars.Items;
         }
 
-        public async Task<List<Garage61PlatformTrack>> GetTracks()
+        public async Task<List<Garage61PlatformTrack>> GetTracks(CancellationToken cancellationToken = default)
         {
-            var tracks = await GetAsync<Garage61ListRequest<Garage61PlatformTrack>>("api/v1/tracks");
+            var tracks = await GetAsync<Garage61ListRequest<Garage61PlatformTrack>>("api/v1/tracks", null, cancellationToken).ConfigureAwait(false);
             Logging.Current.Info($"Garage61Data: fetched available tracks (Count: {tracks.Total})");
             return tracks.Items;
         }
